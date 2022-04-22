@@ -124,15 +124,17 @@ In an effort to make channel head selection understandable and deterministic whe
 
 1. Add bundles to the underlying data store
 2. Choose the channel heads and default channel
-3. Rebuild the update graph starting at the new heads
-
-Channel head -- the "latest" operator in a channel -- selection is now informed by [semver](https://semver.org/). The heurstic is simple, the bundle with the highest version in each channel becomes the new head. The default channel is then taken from the maximum versioned bundle which defines a default channel.
+3. Rebuild the update graph starting at the new heads  
+<br />    
+Channel head -- the "latest" operator in a channel -- selection is now informed by [semver](https://semver.org/). The heurstic is that the bundle with the highest version in each channel becomes the new head. The default channel is then taken from the maximum versioned bundle which defines a default channel.
 
 Starting from these heads, opm then rebuilds the entire update graph using the edges defined by the `replaces` and `skips` CSV fields.
 
-If a given CSV is missing a version field, all CSVs (sourced from the command's arguments) belonging package are elided from the input. Additionally, a non-zero exit code is returned from the command.
-CSVs without a version (and with duplicate versions) that are already part of the index are allowed so long as there is at least one CSV with a version field in the package that we can recognize as having the maximum version.
-When `--overwrite-latest` is set, all bundle in a package are deleted and passed in as "input", and thus are constrained by the rules set out in the first paragraph above; the exceptions set out in the second paragraph above do not apply, and violations cause the offending package to be excluded from the index.
+If a given CSV is missing a version field, the command ignores all CSVs (sourced from the command's arguments) belonging to that package and exits with a non-zero status code.  
+    
+CSVs without a version (and with duplicate versions) that are *already part of the index* are allowed so long as there is at least one CSV with a version field in the package that is recognizable as having the maximum version.  
+    
+When `--overwrite-latest` is set, all existing bundles in a package are processed as new "input", and are thus constrained by the rules for new bundles with no exception for previously-existing unversioned/duplicatively-versioned CSVs, and any offending package in input will be excluded from the resulting index.
 
 #### What does this mean for a package author?
 
